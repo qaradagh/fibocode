@@ -216,7 +216,6 @@ input color          InpButtonColorActive = 16766720;      // Button Color (Acti
 input color          InpButtonTextColor = 16777215;        // Button Text Color
 input color          InpButtonBorderColor = clrNONE;       // Button Border Color
 input int            InpButtonFontSize = 8;                // Button Font Size
-input bool           InpButtonFontBold = false;            // Button Font Bold
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Info Panel Settings                           |
@@ -225,14 +224,21 @@ input group "=== Info Panel Settings ==="
 input ENUM_BASE_CORNER InpInfoPanelCorner = CORNER_RIGHT_UPPER; // Info Panel Anchor Corner
 input int            InpInfoPanelX = 230;                  // Info Panel X Position
 input int            InpInfoPanelY = 616;                  // Info Panel Y Position
+input int            InpInfoPanelWidth = 150;              // Info Panel Width
+input int            InpInfoPanelHeight = 60;              // Info Panel Height
 input color          InpInfoPanelBgColor = 4737096;        // Info Panel Background Color
 input color          InpInfoPanelBorderColor = clrWhite;   // Info Panel Border Color
-input int            InpInfoPanelPaddingX = 10;            // Info Panel Padding X (inside)
-input int            InpInfoPanelPaddingY = 8;             // Info Panel Padding Y (inside)
+
+//+------------------------------------------------------------------+
+//| Input Parameters - Info Text Settings                            |
+//+------------------------------------------------------------------+
+input group "=== Info Text Settings ==="
+input ENUM_BASE_CORNER InpInfoTextCorner = CORNER_RIGHT_UPPER; // Info Text Anchor Corner
+input int            InpInfoTextX = 240;                   // Info Text X Position
+input int            InpInfoTextY = 624;                   // Info Text Y Position
 input int            InpInfoTextSpacing = 18;              // Info Text Line Spacing
 input color          InpInfoTextColor = clrWhite;          // Info Text Color
 input int            InpInfoTextFontSize = 8;              // Info Text Font Size
-input bool           InpInfoTextBold = false;              // Info Text Bold
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Focus Mode Settings                           |
@@ -680,13 +686,7 @@ void CreateButton(string name, string text, int x, int y, int w, int h, ENUM_BAS
    ObjectSetInteger(0, name, OBJPROP_BGCOLOR, InpButtonColorNormal);
    ObjectSetInteger(0, name, OBJPROP_COLOR, InpButtonTextColor);
    ObjectSetInteger(0, name, OBJPROP_BORDER_COLOR, InpButtonBorderColor);
-
-   // Set font with optional bold
-   string fontName = InpGlobalFont;
-   if(InpButtonFontBold && StringFind(fontName, " Bold") < 0)
-      fontName = fontName + " Bold";
-   ObjectSetString(0, name, OBJPROP_FONT, fontName);
-
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpButtonFontSize);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
@@ -718,13 +718,7 @@ void CreateInfoLabel(string name, string text, int x, int y, ENUM_BASE_CORNER co
    ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
    ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
    ObjectSetInteger(0, name, OBJPROP_COLOR, InpInfoTextColor);
-
-   // Set font with optional bold
-   string fontName = InpGlobalFont;
-   if(InpInfoTextBold && StringFind(fontName, " Bold") < 0)
-      fontName = fontName + " Bold";
-   ObjectSetString(0, name, OBJPROP_FONT, fontName);
-
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpInfoTextFontSize);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
@@ -736,22 +730,12 @@ void CreateInfoLabel(string name, string text, int x, int y, ENUM_BASE_CORNER co
 //+------------------------------------------------------------------+
 void CreateInfoPanel()
 {
-   int x = InpInfoPanelX;
-   int y = InpInfoPanelY;
-   int padding = InpInfoPanelPaddingX;
-   int paddingY = InpInfoPanelPaddingY;
-   int spacing = InpInfoTextSpacing;
-
-   // Calculate panel dimensions based on text
-   int panelWidth = 150;  // Fixed width
-   int panelHeight = (paddingY * 2) + (spacing * 2) + InpInfoTextFontSize;
-
    // Create background rectangle
    ObjectCreate(0, g_infoPanelBg, OBJ_RECTANGLE_LABEL, 0, 0, 0);
-   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XDISTANCE, x);
-   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YDISTANCE, y);
-   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XSIZE, panelWidth);
-   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YSIZE, panelHeight);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XDISTANCE, InpInfoPanelX);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YDISTANCE, InpInfoPanelY);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XSIZE, InpInfoPanelWidth);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YSIZE, InpInfoPanelHeight);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_CORNER, InpInfoPanelCorner);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BGCOLOR, InpInfoPanelBgColor);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BORDER_COLOR, InpInfoPanelBorderColor);
@@ -759,13 +743,14 @@ void CreateInfoPanel()
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_SELECTABLE, false);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BACK, true);
 
-   // Create text labels
-   int labelX = x + padding;
-   int labelY = y + paddingY;
+   // Create text labels (separate from panel)
+   int labelX = InpInfoTextX;
+   int labelY = InpInfoTextY;
+   int spacing = InpInfoTextSpacing;
 
-   CreateInfoLabel(g_lblStopLoss, "SL: 0", labelX, labelY, InpInfoPanelCorner);
-   CreateInfoLabel(g_lblBreakout, "BR: 0", labelX, labelY + spacing, InpInfoPanelCorner);
-   CreateInfoLabel(g_lblTimer, "TiMER: 00:00", labelX, labelY + (spacing * 2), InpInfoPanelCorner);
+   CreateInfoLabel(g_lblStopLoss, "SL: 0", labelX, labelY, InpInfoTextCorner);
+   CreateInfoLabel(g_lblBreakout, "BR: 0", labelX, labelY + spacing, InpInfoTextCorner);
+   CreateInfoLabel(g_lblTimer, "TiMER: 00:00", labelX, labelY + (spacing * 2), InpInfoTextCorner);
 }
 
 //+------------------------------------------------------------------+
