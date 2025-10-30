@@ -216,6 +216,7 @@ input color          InpButtonColorActive = 16766720;      // Button Color (Acti
 input color          InpButtonTextColor = 16777215;        // Button Text Color
 input color          InpButtonBorderColor = clrNONE;       // Button Border Color
 input int            InpButtonFontSize = 8;                // Button Font Size
+input bool           InpButtonFontBold = false;            // Button Font Bold
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Info Panel Settings                           |
@@ -231,6 +232,7 @@ input int            InpInfoPanelPaddingY = 8;             // Info Panel Padding
 input int            InpInfoTextSpacing = 18;              // Info Text Line Spacing
 input color          InpInfoTextColor = clrWhite;          // Info Text Color
 input int            InpInfoTextFontSize = 8;              // Info Text Font Size
+input bool           InpInfoTextBold = false;              // Info Text Bold
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Focus Mode Settings                           |
@@ -678,7 +680,13 @@ void CreateButton(string name, string text, int x, int y, int w, int h, ENUM_BAS
    ObjectSetInteger(0, name, OBJPROP_BGCOLOR, InpButtonColorNormal);
    ObjectSetInteger(0, name, OBJPROP_COLOR, InpButtonTextColor);
    ObjectSetInteger(0, name, OBJPROP_BORDER_COLOR, InpButtonBorderColor);
-   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
+
+   // Set font with optional bold
+   string fontName = InpGlobalFont;
+   if(InpButtonFontBold && StringFind(fontName, " Bold") < 0)
+      fontName = fontName + " Bold";
+   ObjectSetString(0, name, OBJPROP_FONT, fontName);
+
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpButtonFontSize);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
@@ -710,7 +718,13 @@ void CreateInfoLabel(string name, string text, int x, int y, ENUM_BASE_CORNER co
    ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
    ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
    ObjectSetInteger(0, name, OBJPROP_COLOR, InpInfoTextColor);
-   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
+
+   // Set font with optional bold
+   string fontName = InpGlobalFont;
+   if(InpInfoTextBold && StringFind(fontName, " Bold") < 0)
+      fontName = fontName + " Bold";
+   ObjectSetString(0, name, OBJPROP_FONT, fontName);
+
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpInfoTextFontSize);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
