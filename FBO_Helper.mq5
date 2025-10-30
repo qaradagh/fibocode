@@ -215,6 +215,7 @@ input color          InpButtonColorPressed = 16777215;     // Button Color (Pres
 input color          InpButtonColorActive = 16766720;      // Button Color (Active)
 input color          InpButtonTextColor = 16777215;        // Button Text Color
 input color          InpButtonBorderColor = clrNONE;       // Button Border Color
+input int            InpButtonBorderWidth = 1;             // Button Border Width
 input int            InpButtonFontSize = 8;                // Button Font Size
 
 //+------------------------------------------------------------------+
@@ -228,6 +229,7 @@ input int            InpInfoPanelWidth = 150;              // Info Panel Width
 input int            InpInfoPanelHeight = 60;              // Info Panel Height
 input color          InpInfoPanelBgColor = 4737096;        // Info Panel Background Color
 input color          InpInfoPanelBorderColor = clrWhite;   // Info Panel Border Color
+input int            InpInfoPanelBorderWidth = 1;          // Info Panel Border Width
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Info Text Settings                            |
@@ -686,6 +688,8 @@ void CreateButton(string name, string text, int x, int y, int w, int h, ENUM_BAS
    ObjectSetInteger(0, name, OBJPROP_BGCOLOR, InpButtonColorNormal);
    ObjectSetInteger(0, name, OBJPROP_COLOR, InpButtonTextColor);
    ObjectSetInteger(0, name, OBJPROP_BORDER_COLOR, InpButtonBorderColor);
+   ObjectSetInteger(0, name, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+   ObjectSetInteger(0, name, OBJPROP_WIDTH, InpButtonBorderWidth);
    ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpButtonFontSize);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
@@ -740,6 +744,7 @@ void CreateInfoPanel()
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BGCOLOR, InpInfoPanelBgColor);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BORDER_COLOR, InpInfoPanelBorderColor);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_WIDTH, InpInfoPanelBorderWidth);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_SELECTABLE, false);
    ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BACK, true);
 
