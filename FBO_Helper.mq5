@@ -31,26 +31,10 @@ enum ENUM_MERGE_MODE
    MERGE_MANUAL    // Manual (custom points)
 };
 
-enum ENUM_MERGE_MULTIPLIER
-{
-   MERGE_1X,       // 1x Stop Loss
-   MERGE_HALF,     // 0.5x Stop Loss
-   MERGE_THIRD,    // 0.333x Stop Loss (1/3)
-   MERGE_QUARTER   // 0.25x Stop Loss
-};
-
 enum ENUM_SHADOW_MODE
 {
    SHADOW_AUTO,    // Auto (based on Stop Loss)
    SHADOW_MANUAL   // Manual (custom points)
-};
-
-enum ENUM_SHADOW_MULTIPLIER
-{
-   SHADOW_1X,      // 1x Stop Loss
-   SHADOW_HALF,    // 0.5x Stop Loss
-   SHADOW_THIRD,   // 0.333x Stop Loss (1/3)
-   SHADOW_QUARTER  // 0.25x Stop Loss
 };
 //+------------------------------------------------------------------+
 //| Input Parameters - Stop Loss Manual                             |
@@ -111,7 +95,7 @@ input bool           InpEnableBOSFilter = true;            // Enable Break of St
 //+------------------------------------------------------------------+
 input group "=== Merge Settings ==="
 input ENUM_MERGE_MODE InpMergeMode = MERGE_AUTO;           // Merge Mode
-input ENUM_MERGE_MULTIPLIER InpMergeMultiplier = MERGE_HALF; // Auto Mode Multiplier
+input double         InpMergeMultiplier = 0.5;             // Auto Mode Multiplier (e.g. 0.5, 1.0, 1.5)
 input int            InpMergeProximity = 200;              // Manual Mode Proximity (Points)
 
 //+------------------------------------------------------------------+
@@ -120,7 +104,7 @@ input int            InpMergeProximity = 200;              // Manual Mode Proxim
 input group "=== Shadow Detection Settings ==="
 input bool           InpEnableShadowDetection = true;      // Enable Long Shadow/PinBar Detection?
 input ENUM_SHADOW_MODE InpShadowMode = SHADOW_AUTO;        // Shadow Mode
-input ENUM_SHADOW_MULTIPLIER InpShadowMultiplier = SHADOW_HALF; // Auto Mode Multiplier
+input double         InpShadowMultiplier = 0.5;            // Auto Mode Multiplier (e.g. 0.5, 1.0, 1.5)
 input int            InpMinShadowPoints = 500;             // Manual Mode Minimum Length (Points)
 input ENUM_SHADOW_HANDLING InpLongShadowsHandling = SHADOW_LARGER; // How to handle candles with both shadows long
 
@@ -181,14 +165,6 @@ input bool           InpUseSpread = true;                    // Use Spread for E
 input group "=== Timer Settings ==="
 input bool           InpEnableTimer = true;                // Enable Timer
 input int            InpTimerDuration = 40;                // Timer Duration (Seconds)
-input ENUM_BASE_CORNER InpTimerCorner = CORNER_RIGHT_UPPER;// Timer Anchor Corner
-input int            InpTimerX = 68;                       // Timer X Position
-input int            InpTimerY = 612;                      // Timer Y Position
-input int            InpTimerFontSize = 15;                // Timer Font Size (Icon + Number)
-input color          InpTimerColorDefault = 4737096;       // Timer Color (Default)
-input color          InpTimerColorArmed = 45055;           // Timer Color (Armed)
-input color          InpTimerColorActiveHigh = 5573631;    // Timer Color (Active > 10s)
-input color          InpTimerColorActiveLow = 51976;       // Timer Color (Active <= 10s)
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Timeframe Warning                             |
@@ -238,17 +214,23 @@ input color          InpButtonColorNormal = 4737096;       // Button Color (Norm
 input color          InpButtonColorPressed = 16777215;     // Button Color (Pressed)
 input color          InpButtonColorActive = 16766720;      // Button Color (Active)
 input color          InpButtonTextColor = 16777215;        // Button Text Color
+input color          InpButtonBorderColor = clrNONE;       // Button Border Color
 input int            InpButtonFontSize = 8;                // Button Font Size
 
 //+------------------------------------------------------------------+
-//| Input Parameters - Display Text Settings                         |
+//| Input Parameters - Info Panel Settings                           |
 //+------------------------------------------------------------------+
-input group "=== Display Text Settings ==="
-input ENUM_BASE_CORNER InpTextCorner = CORNER_RIGHT_UPPER; // Text Anchor Corner
-input int            InpTextX = 230;                       // Text X Position
-input int            InpTextY = 616;                       // Text Y Position
-input color          InpTextColor = 4737096;               // Text Color
-input int            InpTextFontSize = 8;                  // Text Font Size
+input group "=== Info Panel Settings ==="
+input ENUM_BASE_CORNER InpInfoPanelCorner = CORNER_RIGHT_UPPER; // Info Panel Anchor Corner
+input int            InpInfoPanelX = 230;                  // Info Panel X Position
+input int            InpInfoPanelY = 616;                  // Info Panel Y Position
+input color          InpInfoPanelBgColor = 4737096;        // Info Panel Background Color
+input color          InpInfoPanelBorderColor = clrWhite;   // Info Panel Border Color
+input int            InpInfoPanelPaddingX = 10;            // Info Panel Padding X (inside)
+input int            InpInfoPanelPaddingY = 8;             // Info Panel Padding Y (inside)
+input int            InpInfoTextSpacing = 18;              // Info Text Line Spacing
+input color          InpInfoTextColor = clrWhite;          // Info Text Color
+input int            InpInfoTextFontSize = 8;              // Info Text Font Size
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Focus Mode Settings                           |
@@ -258,6 +240,12 @@ input int            InpFocusedWidth = 2;                    // Focused Line/Fib
 input color          InpFocusDimmedColor = clrDarkGray;      // Dimmed Line Color
 input int            InpFocusDimmedWidth = 1;                // Dimmed Line Width
 input color          InpFocusDimmedBoxColor = C'40,40,40';   // Dimmed Box Color
+
+//+------------------------------------------------------------------+
+//| Input Parameters - Global Font Settings                          |
+//+------------------------------------------------------------------+
+input group "=== Global Font Settings ==="
+input string         InpGlobalFont = "Arial";               // Global Font Family
 
 //+------------------------------------------------------------------+
 //| Constants                                                         |
@@ -286,6 +274,7 @@ string g_btnFocus = "FBO_BTN_FOCUS";
 string g_lblStopLoss = "FBO_LBL_SL";
 string g_lblBreakout = "FBO_LBL_BO";
 string g_lblTimer = "FBO_LBL_TIMER";
+string g_infoPanelBg = "FBO_INFO_PANEL_BG";
 string g_lblWarning = "FBO_LBL_WARNING";
 string g_lblSymbolWarning = "FBO_LBL_SYM_WARNING"; 
 
@@ -457,17 +446,9 @@ int OnInit()
 
    // Create UI Panel (Buttons only)
    CreateUIPanel();
-   // Create Timer Label (if enabled)
-   if(InpEnableTimer)
-   {
-      CreateTextLabel(g_lblTimer, "--", InpTimerX, InpTimerY, InpTimerCorner);
-      ObjectSetInteger(0, g_lblTimer, OBJPROP_FONTSIZE, InpTimerFontSize);
-      ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorDefault); // Default state
-   }
-   
-   // Create SL/Breakout Labels
-   CreateTextLabel(g_lblStopLoss, "Stop loss: 0", InpTextX, InpTextY, InpTextCorner);
-   CreateTextLabel(g_lblBreakout, "Breakout: 0", InpTextX, InpTextY + 20, InpTextCorner); 
+
+   // Create Info Panel (SL, BR, Timer)
+   CreateInfoPanel(); 
 
    // Display calculated values (populates the labels created above)
    UpdateCalculatedValues();
@@ -675,6 +656,7 @@ void DeleteUIPanel()
    ObjectDelete(0, g_btnAutoDetect);
    ObjectDelete(0, g_btnUndo);
    ObjectDelete(0, g_btnFocus);
+   ObjectDelete(0, g_infoPanelBg);
    ObjectDelete(0, g_lblStopLoss);
    ObjectDelete(0, g_lblBreakout);
    ObjectDelete(0, g_lblTimer);
@@ -695,6 +677,8 @@ void CreateButton(string name, string text, int x, int y, int w, int h, ENUM_BAS
    ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
    ObjectSetInteger(0, name, OBJPROP_BGCOLOR, InpButtonColorNormal);
    ObjectSetInteger(0, name, OBJPROP_COLOR, InpButtonTextColor);
+   ObjectSetInteger(0, name, OBJPROP_BORDER_COLOR, InpButtonBorderColor);
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpButtonFontSize);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
@@ -702,7 +686,7 @@ void CreateButton(string name, string text, int x, int y, int w, int h, ENUM_BAS
 }
 
 //+------------------------------------------------------------------+
-//| Create Text Label                                               |
+//| Create Text Label (Generic)                                      |
 //+------------------------------------------------------------------+
 void CreateTextLabel(string name, string text, int x, int y, ENUM_BASE_CORNER corner = CORNER_LEFT_UPPER)
 {
@@ -710,11 +694,64 @@ void CreateTextLabel(string name, string text, int x, int y, ENUM_BASE_CORNER co
    ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
    ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
    ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
-   ObjectSetInteger(0, name, OBJPROP_COLOR, InpTextColor);
-   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpTextFontSize);
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
    ObjectSetInteger(0, name, OBJPROP_BACK, false);
+}
+
+//+------------------------------------------------------------------+
+//| Create Text Label for Info Panel                                |
+//+------------------------------------------------------------------+
+void CreateInfoLabel(string name, string text, int x, int y, ENUM_BASE_CORNER corner = CORNER_LEFT_UPPER)
+{
+   ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
+   ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
+   ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
+   ObjectSetInteger(0, name, OBJPROP_COLOR, InpInfoTextColor);
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
+   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpInfoTextFontSize);
+   ObjectSetString(0, name, OBJPROP_TEXT, text);
+   ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, name, OBJPROP_BACK, false);
+}
+
+//+------------------------------------------------------------------+
+//| Create Info Panel                                                |
+//+------------------------------------------------------------------+
+void CreateInfoPanel()
+{
+   int x = InpInfoPanelX;
+   int y = InpInfoPanelY;
+   int padding = InpInfoPanelPaddingX;
+   int paddingY = InpInfoPanelPaddingY;
+   int spacing = InpInfoTextSpacing;
+
+   // Calculate panel dimensions based on text
+   int panelWidth = 150;  // Fixed width
+   int panelHeight = (paddingY * 2) + (spacing * 2) + InpInfoTextFontSize;
+
+   // Create background rectangle
+   ObjectCreate(0, g_infoPanelBg, OBJ_RECTANGLE_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XDISTANCE, x);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YDISTANCE, y);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XSIZE, panelWidth);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YSIZE, panelHeight);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_CORNER, InpInfoPanelCorner);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BGCOLOR, InpInfoPanelBgColor);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BORDER_COLOR, InpInfoPanelBorderColor);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BACK, true);
+
+   // Create text labels
+   int labelX = x + padding;
+   int labelY = y + paddingY;
+
+   CreateInfoLabel(g_lblStopLoss, "SL: 0", labelX, labelY, InpInfoPanelCorner);
+   CreateInfoLabel(g_lblBreakout, "BR: 0", labelX, labelY + spacing, InpInfoPanelCorner);
+   CreateInfoLabel(g_lblTimer, "TiMER: 00:00", labelX, labelY + (spacing * 2), InpInfoPanelCorner);
 }
 
 //+------------------------------------------------------------------+
@@ -1206,8 +1243,8 @@ void UpdateCalculatedValues()
       g_calculatedBreakout = (int)MathRound(g_calculatedSL / 3.0);
    }
 
-   ObjectSetString(0, g_lblStopLoss, OBJPROP_TEXT, "Stop loss: " + IntegerToString(g_calculatedSL));
-   ObjectSetString(0, g_lblBreakout, OBJPROP_TEXT, "Breakout: " + IntegerToString(g_calculatedBreakout));
+   ObjectSetString(0, g_lblStopLoss, OBJPROP_TEXT, "SL: " + IntegerToString(g_calculatedSL));
+   ObjectSetString(0, g_lblBreakout, OBJPROP_TEXT, "BR: " + IntegerToString(g_calculatedBreakout));
 }
 
 //+------------------------------------------------------------------+
@@ -1905,8 +1942,7 @@ void UpdateTimer()
 {
    if(!InpEnableTimer || !g_tradeActive) {
       if(ObjectFind(0, g_lblTimer) >= 0) {
-          ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "--");
-          ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorDefault);
+          ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: --");
       }
       return;
    }
@@ -1915,10 +1951,9 @@ void UpdateTimer()
    int remaining = InpTimerDuration - elapsed;
    if(remaining < 0) remaining = 0;
    if(ObjectFind(0, g_lblTimer) < 0) return;
-   
-   string timerText = StringFormat("%d", remaining);
+
+   string timerText = StringFormat("TiMER: %d", remaining);
    ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, timerText);
-   ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, remaining > 10 ? InpTimerColorActiveHigh : InpTimerColorActiveLow);
    ChartRedraw();
 }
 
@@ -1929,10 +1964,10 @@ void SetTimerState(ENUM_TRADE_STATE state)
 {
    if(!InpEnableTimer || ObjectFind(0, g_lblTimer) < 0) return;
    switch(state) {
-      case TRADE_STATE_NONE:     ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "--"); ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorDefault); break;
-      case TRADE_STATE_BREAKOUT: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "--"); ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorArmed); break;
+      case TRADE_STATE_NONE:     ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: --"); break;
+      case TRADE_STATE_BREAKOUT: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: --"); break;
       case TRADE_STATE_ACTIVE:
-      case TRADE_STATE_RECOVERY: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, IntegerToString(InpTimerDuration)); ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorActiveHigh); break;
+      case TRADE_STATE_RECOVERY: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: " + IntegerToString(InpTimerDuration)); break;
    }
    ChartRedraw();
 }
@@ -2049,17 +2084,8 @@ void DetectUnmitigatedLevels()
       }
       else
       {
-         double multiplier = MULTIPLIER_FULL;
-         switch(InpShadowMultiplier)
-         {
-            case SHADOW_1X:      multiplier = MULTIPLIER_FULL;    break;
-            case SHADOW_HALF:    multiplier = MULTIPLIER_HALF;    break;
-            case SHADOW_THIRD:   multiplier = MULTIPLIER_THIRD;   break;
-            case SHADOW_QUARTER: multiplier = MULTIPLIER_QUARTER; break;
-         }
-
-         min_shadow_price = (slPoints * multiplier) * point;
-         Print("Shadow Auto Mode: SL=", slPoints, " points, Multiplier=", multiplier, ", Min Shadow=", min_shadow_price / point, " points");
+         min_shadow_price = (slPoints * InpShadowMultiplier) * point;
+         Print("Shadow Auto Mode: SL=", slPoints, " points, Multiplier=", InpShadowMultiplier, ", Min Shadow=", min_shadow_price / point, " points");
       }
    }
    else
@@ -2322,17 +2348,8 @@ void MergeNearbyLevels()
          return;
       }
 
-      double multiplier = MULTIPLIER_FULL;
-      switch(InpMergeMultiplier)
-      {
-         case MERGE_1X:      multiplier = MULTIPLIER_FULL;    break;
-         case MERGE_HALF:    multiplier = MULTIPLIER_HALF;    break;
-         case MERGE_THIRD:   multiplier = MULTIPLIER_THIRD;   break;
-         case MERGE_QUARTER: multiplier = MULTIPLIER_QUARTER; break;
-      }
-
-      proximity = (slPoints * multiplier) * SymbolInfoDouble(_Symbol, SYMBOL_POINT);
-      Print("Merge Auto Mode: SL=", slPoints, " points, Multiplier=", multiplier, ", Proximity=", proximity / SymbolInfoDouble(_Symbol, SYMBOL_POINT), " points");
+      proximity = (slPoints * InpMergeMultiplier) * SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+      Print("Merge Auto Mode: SL=", slPoints, " points, Multiplier=", InpMergeMultiplier, ", Proximity=", proximity / SymbolInfoDouble(_Symbol, SYMBOL_POINT), " points");
    }
    else
    {
