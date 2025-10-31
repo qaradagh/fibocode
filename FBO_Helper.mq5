@@ -256,10 +256,6 @@ input string         InpGlobalFont = "Arial";               // Global Font Famil
 //+------------------------------------------------------------------+
 //| Constants                                                         |
 //+------------------------------------------------------------------+
-#define MULTIPLIER_FULL     1.0
-#define MULTIPLIER_HALF     0.5
-#define MULTIPLIER_THIRD    (1.0/3.0)
-#define MULTIPLIER_QUARTER  0.25
 #define FOCUS_CENTER_DISTANCE_POINTS  100  // Points for fibo center distance check
 
 //+------------------------------------------------------------------+
@@ -1054,7 +1050,7 @@ void ResetAutoMode()
 }
 
 //+------------------------------------------------------------------+
-//| Delete ALL Chart Objects (Complete Reset)                        |
+//| Delete All FBO Chart Objects (Complete Reset)                    |
 //+------------------------------------------------------------------+
 void DeleteAllChartObjects()
 {
@@ -1168,7 +1164,7 @@ void CleanAllExceptActiveTrade()
 //+------------------------------------------------------------------+
 void ResetIndicator()
 {
-   // Delete ALL objects on chart (not just FBO_* ones)
+   // Delete only FBO objects (preserves objects from other EAs/indicators)
    DeleteAllChartObjects();
 
    // Reset auto mode (resets state, timer, fibo tracking, line memory)
