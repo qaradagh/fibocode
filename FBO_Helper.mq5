@@ -50,7 +50,7 @@ input int            InpManualBreakout = 10000;            // Manual Breakout (P
 input group "=== Stop Loss Auto ==="
 input ENUM_CALC_MODE InpCalculationMode = CALC_AUTO;       // Calculation Mode
 input int            InpATRPeriod = 78;                    // Candle Count Period
-input double         InpSLMultiplier = 1.0;                // Multiplier
+input double         InpSLMultiplier = 1.5;                // Multiplier
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Highlight Settings                            |
@@ -58,7 +58,7 @@ input double         InpSLMultiplier = 1.0;                // Multiplier
 input group "=== Highlight Settings ==="
 input int            InpHighlightCandlesBefore = 1;        // Highlight Candles Before
 input int            InpHighlightCandlesAfter = 1;         // Highlight Candles After
-input color          InpHighlightColor = 10288896;         // Highlight Color
+input color          InpHighlightColor = 55295;            // Highlight Color
 
 //+------------------------------------------------------------------+
 //| Input Parameters - High Line Settings                            |
@@ -86,7 +86,7 @@ input int            InpMagnetCandleRange = 3;             // Magnet Candle Rang
 //| Input Parameters - Auto Detection (Unmitigated Levels)          |
 //+------------------------------------------------------------------+
 input group "=== Auto-Detection: Unmitigated Levels ==="
-input int            InpLookbackCandles = 200;             // Lookback Candles
+input int            InpLookbackCandles = 500;             // Lookback Candles
 input int            InpSwingLeftBars = 1;                 // Swing Left Bars
 input int            InpSwingRightBars = 1;                // Swing Right Bars
 input bool           InpEnableBOSFilter = true;            // Enable Break of Structure Filter?
@@ -105,7 +105,7 @@ input int            InpMergeProximity = 200;              // Manual Mode Proxim
 input group "=== Shadow Detection Settings ==="
 input bool           InpEnableShadowDetection = true;      // Enable Long Shadow/PinBar Detection?
 input ENUM_SHADOW_MODE InpShadowMode = SHADOW_AUTO;        // Shadow Mode
-input double         InpShadowMultiplier = 0.5;            // Auto Mode Multiplier (e.g. 0.5, 1.0, 1.5)
+input double         InpShadowMultiplier = 1.0;            // Auto Mode Multiplier (e.g. 0.5, 1.0, 1.5)
 input int            InpMinShadowPoints = 500;             // Manual Mode Minimum Length (Points)
 input ENUM_SHADOW_HANDLING InpLongShadowsHandling = SHADOW_LARGER; // How to handle candles with both shadows long
 
@@ -117,9 +117,9 @@ input color          InpFiboLineColorBuy = 51976;          // Fibo Line Color (B
 input color          InpFiboLineColorSell = 5573631;       // Fibo Line Color (Sell)
 input color          InpFiboLineColorRecoveryBuy = 5573631;// Recovery Fibo Color (Buy becomes Sell)
 input color          InpFiboLineColorRecoverySell = 51976; // Recovery Fibo Color (Sell becomes Buy)
-input int            InpFiboLength = 5;                    // Fibo Length (Candles)
+input int            InpFiboLength = 7;                    // Fibo Length (Candles)
 input int            InpFiboFirstOffset = 1;               // First Fibo Offset (Candles)
-input int            InpFiboSubsequentOffset = 5;          // Subsequent Fibo Offset (Candles)
+input int            InpFiboSubsequentOffset = 20;         // Subsequent Fibo Offset (Candles)
 input bool           InpUpdateFiboLabelsOnSL = true;       // Update Fibo Labels on SL
 
 //+------------------------------------------------------------------+
@@ -135,8 +135,8 @@ input string         InpFiboSellLevelMinus2Label = "rc.tp"; // Level -2 Label
 //| Input Parameters - Fibo Labels Sell (Recovery)                   |
 //+------------------------------------------------------------------+
 input group "=== Fibo Labels Sell (Recovery) ==="
-input string         InpFiboSellLevel1LabelRecov = "rc.entry"; // Level 1 Label (Recovery)
-input string         InpFiboSellLevel0LabelRecov = "rc.sl";  // Level 0 Label (Recovery)
+input string         InpFiboSellLevel1LabelRecov = "rc.sl"; // Level 1 Label (Recovery)
+input string         InpFiboSellLevel0LabelRecov = "rc.entry"; // Level 0 Label (Recovery)
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Fibo Labels Buy (Initial)                     |
@@ -151,8 +151,8 @@ input string         InpFiboBuyLevelMinus2Label = "tp";    // Level -2 Label
 //| Input Parameters - Fibo Labels Buy (Recovery)                    |
 //+------------------------------------------------------------------+
 input group "=== Fibo Labels Buy (Recovery) ==="
-input string         InpFiboBuyLevel1LabelRecov = "rc.sl";    // Level 1 Label (Recovery)
-input string         InpFiboBuyLevel0LabelRecov = "rc.entry"; // Level 0 Label (Recovery)
+input string         InpFiboBuyLevel1LabelRecov = "rc.entry"; // Level 1 Label (Recovery)
+input string         InpFiboBuyLevel0LabelRecov = "rc.sl";    // Level 0 Label (Recovery)
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Auto Mode Settings                            |
@@ -184,7 +184,7 @@ input color          InpWarningColor = 5573631;            // Warning Font Color
 //+------------------------------------------------------------------+
 input group "=== Symbol Warning Settings ==="
 input bool           InpEnableSymbolWarning = true;        // Enable Symbol Warning
-input string         InpWarningSymbol = "US30";            // Warning Symbol (e.g., US30, GDAXI, NAS100)
+input string         InpWarningSymbol = "DJIUSD";          // Warning Symbol (e.g., US30, GDAXI, NAS100)
 input string         InpSymbolWarningText = "WARNING: Symbol is not US30!"; // Symbol Warning Text
 input int            InpSymbolWarningX = 40;               // Symbol Warning X Position
 input int            InpSymbolWarningY = 70;               // Symbol Warning Y Position (below timeframe warning)
@@ -204,14 +204,14 @@ input string         InpAlertTextLoss = "💎 DISCIPLINE MEDAL! Tomorrow is your
 //| Input Parameters - UI Panel Settings                             |
 //+------------------------------------------------------------------+
 input group "=== UI Panel Settings ==="
-input ENUM_BASE_CORNER InpPanelCorner = CORNER_RIGHT_UPPER; // Panel Anchor Corner
+input ENUM_BASE_CORNER InpPanelCorner = CORNER_RIGHT_LOWER; // Panel Anchor Corner
 input int            InpPanelPaddingX = 125;               // Panel Padding X (from corner)
 input int            InpPanelPaddingY = 450;               // Panel Padding Y (from corner)
 input int            InpButtonWidth = 100;                 // Button Width
 input int            InpButtonHeight = 35;                 // Button Height
-input int            InpButtonSpacingH = 5;                // Button Horizontal Spacing
-input int            InpButtonSpacingV = 5;                // Button Vertical Spacing
-input color          InpButtonColorNormal = 4737096;       // Button Color (Normal)
+input int            InpButtonSpacingH = 1;                // Button Horizontal Spacing
+input int            InpButtonSpacingV = 1;                // Button Vertical Spacing
+input color          InpButtonColorNormal = 13434880;      // Button Color (Normal)
 input color          InpButtonColorPressed = 16777215;     // Button Color (Pressed)
 input color          InpButtonColorActive = 16766720;      // Button Color (Active)
 input color          InpButtonTextColor = 16777215;        // Button Text Color
@@ -221,21 +221,21 @@ input int            InpButtonFontSize = 8;                // Button Font Size
 //| Input Parameters - Info Panel Settings                           |
 //+------------------------------------------------------------------+
 input group "=== Info Panel Settings ==="
-input ENUM_BASE_CORNER InpInfoPanelCorner = CORNER_RIGHT_UPPER; // Info Panel Anchor Corner
-input int            InpInfoPanelX = 230;                  // Info Panel X Position
-input int            InpInfoPanelY = 616;                  // Info Panel Y Position
-input int            InpInfoPanelWidth = 150;              // Info Panel Width
-input int            InpInfoPanelHeight = 60;              // Info Panel Height
-input color          InpInfoPanelBgColor = 4737096;        // Info Panel Background Color
+input ENUM_BASE_CORNER InpInfoPanelCorner = CORNER_RIGHT_LOWER; // Info Panel Anchor Corner
+input int            InpInfoPanelX = 226;                  // Info Panel X Position
+input int            InpInfoPanelY = 630;                  // Info Panel Y Position
+input int            InpInfoPanelWidth = 201;              // Info Panel Width
+input int            InpInfoPanelHeight = 100;             // Info Panel Height
+input color          InpInfoPanelBgColor = 2631720;        // Info Panel Background Color
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Info Text Settings                            |
 //+------------------------------------------------------------------+
 input group "=== Info Text Settings ==="
-input ENUM_BASE_CORNER InpInfoTextCorner = CORNER_RIGHT_UPPER; // Info Text Anchor Corner
-input int            InpInfoTextX = 240;                   // Info Text X Position
-input int            InpInfoTextY = 624;                   // Info Text Y Position
-input int            InpInfoTextSpacing = 18;              // Info Text Line Spacing
+input ENUM_BASE_CORNER InpInfoTextCorner = CORNER_RIGHT_LOWER; // Info Text Anchor Corner
+input int            InpInfoTextX = 202;                   // Info Text X Position
+input int            InpInfoTextY = 645;                   // Info Text Y Position
+input int            InpInfoTextSpacing = 24;              // Info Text Line Spacing
 input color          InpInfoTextColor = clrWhite;          // Info Text Color
 input int            InpInfoTextFontSize = 8;              // Info Text Font Size
 
@@ -244,26 +244,26 @@ input int            InpInfoTextFontSize = 8;              // Info Text Font Siz
 //+------------------------------------------------------------------+
 input group "=== Focus Mode Settings ==="
 input int            InpFocusedWidth = 2;                    // Focused Line/Fibo Width (Bold)
-input color          InpFocusDimmedColor = clrDarkGray;      // Dimmed Line Color
+input color          InpFocusDimmedColor = 14474460;         // Dimmed Line Color
 input int            InpFocusDimmedWidth = 1;                // Dimmed Line Width
-input color          InpFocusDimmedBoxColor = C'40,40,40';   // Dimmed Box Color
+input color          InpFocusDimmedBoxColor = 2631720;       // Dimmed Box Color
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Indicator Name Label Settings                 |
 //+------------------------------------------------------------------+
 input group "=== Indicator Name Label Settings ==="
-input string         InpIndicatorName = "▪ NY_FBO v3.0";    // Indicator Name (customizable)
-input ENUM_BASE_CORNER InpNameLabelCorner = CORNER_RIGHT_UPPER; // Name Label Anchor Corner
-input int            InpNameLabelX = 125;                  // Name Label X Position
-input int            InpNameLabelY = 420;                  // Name Label Y Position
-input color          InpNameLabelColor = clrWhite;         // Name Label Color
-input int            InpNameLabelFontSize = 10;            // Name Label Font Size
+input string         InpIndicatorName = "Maral ✿◡‿◡ ";     // Indicator Name (customizable)
+input ENUM_BASE_CORNER InpNameLabelCorner = CORNER_RIGHT_LOWER; // Name Label Anchor Corner
+input int            InpNameLabelX = 204;                  // Name Label X Position
+input int            InpNameLabelY = 416;                  // Name Label Y Position
+input color          InpNameLabelColor = 2631720;          // Name Label Color
+input int            InpNameLabelFontSize = 9;             // Name Label Font Size
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Global Font Settings                          |
 //+------------------------------------------------------------------+
 input group "=== Global Font Settings ==="
-input string         InpGlobalFont = "Arial";               // Global Font Family
+input string         InpGlobalFont = "coves bold";          // Global Font Family
 
 //+------------------------------------------------------------------+
 //| Constants                                                         |
