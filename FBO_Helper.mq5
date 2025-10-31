@@ -1,9 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                                   FBO_Helper.mq5 |
 //+------------------------------------------------------------------+
-#property copyright "FBO Helper Indicator"
+#property copyright "NY_FBO Indicator"
 #property link      ""
 #property version   "3.00"
+#property description "New York Fake BreakOut Trading System with Recovery"
 #property indicator_chart_window
 #property indicator_plots 0
 #property indicator_buffers 1
@@ -31,26 +32,10 @@ enum ENUM_MERGE_MODE
    MERGE_MANUAL    // Manual (custom points)
 };
 
-enum ENUM_MERGE_MULTIPLIER
-{
-   MERGE_1X,       // 1x Stop Loss
-   MERGE_HALF,     // 0.5x Stop Loss
-   MERGE_THIRD,    // 0.333x Stop Loss (1/3)
-   MERGE_QUARTER   // 0.25x Stop Loss
-};
-
 enum ENUM_SHADOW_MODE
 {
    SHADOW_AUTO,    // Auto (based on Stop Loss)
    SHADOW_MANUAL   // Manual (custom points)
-};
-
-enum ENUM_SHADOW_MULTIPLIER
-{
-   SHADOW_1X,      // 1x Stop Loss
-   SHADOW_HALF,    // 0.5x Stop Loss
-   SHADOW_THIRD,   // 0.333x Stop Loss (1/3)
-   SHADOW_QUARTER  // 0.25x Stop Loss
 };
 //+------------------------------------------------------------------+
 //| Input Parameters - Stop Loss Manual                             |
@@ -111,7 +96,7 @@ input bool           InpEnableBOSFilter = true;            // Enable Break of St
 //+------------------------------------------------------------------+
 input group "=== Merge Settings ==="
 input ENUM_MERGE_MODE InpMergeMode = MERGE_AUTO;           // Merge Mode
-input ENUM_MERGE_MULTIPLIER InpMergeMultiplier = MERGE_HALF; // Auto Mode Multiplier
+input double         InpMergeMultiplier = 0.5;             // Auto Mode Multiplier (e.g. 0.5, 1.0, 1.5)
 input int            InpMergeProximity = 200;              // Manual Mode Proximity (Points)
 
 //+------------------------------------------------------------------+
@@ -120,7 +105,7 @@ input int            InpMergeProximity = 200;              // Manual Mode Proxim
 input group "=== Shadow Detection Settings ==="
 input bool           InpEnableShadowDetection = true;      // Enable Long Shadow/PinBar Detection?
 input ENUM_SHADOW_MODE InpShadowMode = SHADOW_AUTO;        // Shadow Mode
-input ENUM_SHADOW_MULTIPLIER InpShadowMultiplier = SHADOW_HALF; // Auto Mode Multiplier
+input double         InpShadowMultiplier = 0.5;            // Auto Mode Multiplier (e.g. 0.5, 1.0, 1.5)
 input int            InpMinShadowPoints = 500;             // Manual Mode Minimum Length (Points)
 input ENUM_SHADOW_HANDLING InpLongShadowsHandling = SHADOW_LARGER; // How to handle candles with both shadows long
 
@@ -181,14 +166,6 @@ input bool           InpUseSpread = true;                    // Use Spread for E
 input group "=== Timer Settings ==="
 input bool           InpEnableTimer = true;                // Enable Timer
 input int            InpTimerDuration = 40;                // Timer Duration (Seconds)
-input ENUM_BASE_CORNER InpTimerCorner = CORNER_RIGHT_UPPER;// Timer Anchor Corner
-input int            InpTimerX = 68;                       // Timer X Position
-input int            InpTimerY = 612;                      // Timer Y Position
-input int            InpTimerFontSize = 15;                // Timer Font Size (Icon + Number)
-input color          InpTimerColorDefault = 4737096;       // Timer Color (Default)
-input color          InpTimerColorArmed = 45055;           // Timer Color (Armed)
-input color          InpTimerColorActiveHigh = 5573631;    // Timer Color (Active > 10s)
-input color          InpTimerColorActiveLow = 51976;       // Timer Color (Active <= 10s)
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Timeframe Warning                             |
@@ -241,14 +218,26 @@ input color          InpButtonTextColor = 16777215;        // Button Text Color
 input int            InpButtonFontSize = 8;                // Button Font Size
 
 //+------------------------------------------------------------------+
-//| Input Parameters - Display Text Settings                         |
+//| Input Parameters - Info Panel Settings                           |
 //+------------------------------------------------------------------+
-input group "=== Display Text Settings ==="
-input ENUM_BASE_CORNER InpTextCorner = CORNER_RIGHT_UPPER; // Text Anchor Corner
-input int            InpTextX = 230;                       // Text X Position
-input int            InpTextY = 616;                       // Text Y Position
-input color          InpTextColor = 4737096;               // Text Color
-input int            InpTextFontSize = 8;                  // Text Font Size
+input group "=== Info Panel Settings ==="
+input ENUM_BASE_CORNER InpInfoPanelCorner = CORNER_RIGHT_UPPER; // Info Panel Anchor Corner
+input int            InpInfoPanelX = 230;                  // Info Panel X Position
+input int            InpInfoPanelY = 616;                  // Info Panel Y Position
+input int            InpInfoPanelWidth = 150;              // Info Panel Width
+input int            InpInfoPanelHeight = 60;              // Info Panel Height
+input color          InpInfoPanelBgColor = 4737096;        // Info Panel Background Color
+
+//+------------------------------------------------------------------+
+//| Input Parameters - Info Text Settings                            |
+//+------------------------------------------------------------------+
+input group "=== Info Text Settings ==="
+input ENUM_BASE_CORNER InpInfoTextCorner = CORNER_RIGHT_UPPER; // Info Text Anchor Corner
+input int            InpInfoTextX = 240;                   // Info Text X Position
+input int            InpInfoTextY = 624;                   // Info Text Y Position
+input int            InpInfoTextSpacing = 18;              // Info Text Line Spacing
+input color          InpInfoTextColor = clrWhite;          // Info Text Color
+input int            InpInfoTextFontSize = 8;              // Info Text Font Size
 
 //+------------------------------------------------------------------+
 //| Input Parameters - Focus Mode Settings                           |
@@ -260,12 +249,25 @@ input int            InpFocusDimmedWidth = 1;                // Dimmed Line Widt
 input color          InpFocusDimmedBoxColor = C'40,40,40';   // Dimmed Box Color
 
 //+------------------------------------------------------------------+
+//| Input Parameters - Indicator Name Label Settings                 |
+//+------------------------------------------------------------------+
+input group "=== Indicator Name Label Settings ==="
+input string         InpIndicatorName = "▪ NY_FBO v3.0";    // Indicator Name (customizable)
+input ENUM_BASE_CORNER InpNameLabelCorner = CORNER_RIGHT_UPPER; // Name Label Anchor Corner
+input int            InpNameLabelX = 125;                  // Name Label X Position
+input int            InpNameLabelY = 420;                  // Name Label Y Position
+input color          InpNameLabelColor = clrWhite;         // Name Label Color
+input int            InpNameLabelFontSize = 10;            // Name Label Font Size
+
+//+------------------------------------------------------------------+
+//| Input Parameters - Global Font Settings                          |
+//+------------------------------------------------------------------+
+input group "=== Global Font Settings ==="
+input string         InpGlobalFont = "Arial";               // Global Font Family
+
+//+------------------------------------------------------------------+
 //| Constants                                                         |
 //+------------------------------------------------------------------+
-#define MULTIPLIER_FULL     1.0
-#define MULTIPLIER_HALF     0.5
-#define MULTIPLIER_THIRD    (1.0/3.0)
-#define MULTIPLIER_QUARTER  0.25
 #define FOCUS_CENTER_DISTANCE_POINTS  100  // Points for fibo center distance check
 
 //+------------------------------------------------------------------+
@@ -286,6 +288,8 @@ string g_btnFocus = "FBO_BTN_FOCUS";
 string g_lblStopLoss = "FBO_LBL_SL";
 string g_lblBreakout = "FBO_LBL_BO";
 string g_lblTimer = "FBO_LBL_TIMER";
+string g_infoPanelBg = "FBO_INFO_PANEL_BG";
+string g_lblIndicatorName = "FBO_LBL_NAME";
 string g_lblWarning = "FBO_LBL_WARNING";
 string g_lblSymbolWarning = "FBO_LBL_SYM_WARNING"; 
 
@@ -457,17 +461,12 @@ int OnInit()
 
    // Create UI Panel (Buttons only)
    CreateUIPanel();
-   // Create Timer Label (if enabled)
-   if(InpEnableTimer)
-   {
-      CreateTextLabel(g_lblTimer, "--", InpTimerX, InpTimerY, InpTimerCorner);
-      ObjectSetInteger(0, g_lblTimer, OBJPROP_FONTSIZE, InpTimerFontSize);
-      ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorDefault); // Default state
-   }
-   
-   // Create SL/Breakout Labels
-   CreateTextLabel(g_lblStopLoss, "Stop loss: 0", InpTextX, InpTextY, InpTextCorner);
-   CreateTextLabel(g_lblBreakout, "Breakout: 0", InpTextX, InpTextY + 20, InpTextCorner); 
+
+   // Create Indicator Name Label
+   CreateIndicatorNameLabel();
+
+   // Create Info Panel (SL, BR, Timer)
+   CreateInfoPanel(); 
 
    // Display calculated values (populates the labels created above)
    UpdateCalculatedValues();
@@ -559,18 +558,6 @@ int OnCalculate(const int rates_total,
    if(g_autoModeActive) { ProcessAutoMode(); }
 
    if(g_tradeActive && InpEnableTimer) { UpdateTimer(); }
-
-   // Update Focus Mode dynamically if active
-   if(g_isFocusActive)
-   {
-      string currentNearestLine = FindNearestLineToPrice();
-      if(currentNearestLine != "" && currentNearestLine != g_focusedLine)
-      {
-         // Nearest line has changed, update focus
-         DeactivateFocusMode();
-         ActivateFocusMode(currentNearestLine);
-      }
-   }
 
    return(rates_total);
 }
@@ -675,6 +662,8 @@ void DeleteUIPanel()
    ObjectDelete(0, g_btnAutoDetect);
    ObjectDelete(0, g_btnUndo);
    ObjectDelete(0, g_btnFocus);
+   ObjectDelete(0, g_infoPanelBg);
+   ObjectDelete(0, g_lblIndicatorName);
    ObjectDelete(0, g_lblStopLoss);
    ObjectDelete(0, g_lblBreakout);
    ObjectDelete(0, g_lblTimer);
@@ -695,6 +684,7 @@ void CreateButton(string name, string text, int x, int y, int w, int h, ENUM_BAS
    ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
    ObjectSetInteger(0, name, OBJPROP_BGCOLOR, InpButtonColorNormal);
    ObjectSetInteger(0, name, OBJPROP_COLOR, InpButtonTextColor);
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
    ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpButtonFontSize);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
@@ -702,7 +692,7 @@ void CreateButton(string name, string text, int x, int y, int w, int h, ENUM_BAS
 }
 
 //+------------------------------------------------------------------+
-//| Create Text Label                                               |
+//| Create Text Label (Generic)                                      |
 //+------------------------------------------------------------------+
 void CreateTextLabel(string name, string text, int x, int y, ENUM_BASE_CORNER corner = CORNER_LEFT_UPPER)
 {
@@ -710,11 +700,70 @@ void CreateTextLabel(string name, string text, int x, int y, ENUM_BASE_CORNER co
    ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
    ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
    ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
-   ObjectSetInteger(0, name, OBJPROP_COLOR, InpTextColor);
-   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpTextFontSize);
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
    ObjectSetString(0, name, OBJPROP_TEXT, text);
    ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
    ObjectSetInteger(0, name, OBJPROP_BACK, false);
+}
+
+//+------------------------------------------------------------------+
+//| Create Text Label for Info Panel                                |
+//+------------------------------------------------------------------+
+void CreateInfoLabel(string name, string text, int x, int y, ENUM_BASE_CORNER corner = CORNER_LEFT_UPPER)
+{
+   ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
+   ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
+   ObjectSetInteger(0, name, OBJPROP_CORNER, corner);
+   ObjectSetInteger(0, name, OBJPROP_COLOR, InpInfoTextColor);
+   ObjectSetString(0, name, OBJPROP_FONT, InpGlobalFont);
+   ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpInfoTextFontSize);
+   ObjectSetString(0, name, OBJPROP_TEXT, text);
+   ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, name, OBJPROP_BACK, false);
+}
+
+//+------------------------------------------------------------------+
+//| Create Info Panel                                                |
+//+------------------------------------------------------------------+
+void CreateInfoPanel()
+{
+   // Create background rectangle
+   ObjectCreate(0, g_infoPanelBg, OBJ_RECTANGLE_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XDISTANCE, InpInfoPanelX);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YDISTANCE, InpInfoPanelY);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_XSIZE, InpInfoPanelWidth);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_YSIZE, InpInfoPanelHeight);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_CORNER, InpInfoPanelCorner);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BGCOLOR, InpInfoPanelBgColor);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, g_infoPanelBg, OBJPROP_BACK, true);
+
+   // Create text labels (separate from panel)
+   int labelX = InpInfoTextX;
+   int labelY = InpInfoTextY;
+   int spacing = InpInfoTextSpacing;
+
+   CreateInfoLabel(g_lblStopLoss, "SL: 0", labelX, labelY, InpInfoTextCorner);
+   CreateInfoLabel(g_lblBreakout, "BR: 0", labelX, labelY + spacing, InpInfoTextCorner);
+   CreateInfoLabel(g_lblTimer, "TiMER: 00:00", labelX, labelY + (spacing * 2), InpInfoTextCorner);
+}
+
+//+------------------------------------------------------------------+
+//| Create Indicator Name Label                                      |
+//+------------------------------------------------------------------+
+void CreateIndicatorNameLabel()
+{
+   ObjectCreate(0, g_lblIndicatorName, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_XDISTANCE, InpNameLabelX);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_YDISTANCE, InpNameLabelY);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_CORNER, InpNameLabelCorner);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_COLOR, InpNameLabelColor);
+   ObjectSetString(0, g_lblIndicatorName, OBJPROP_FONT, InpGlobalFont);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_FONTSIZE, InpNameLabelFontSize);
+   ObjectSetString(0, g_lblIndicatorName, OBJPROP_TEXT, InpIndicatorName);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_BACK, false);
 }
 
 //+------------------------------------------------------------------+
@@ -946,9 +995,11 @@ void CleanAllLines()
    for(int i = ObjectsTotal(0, 0, OBJ_HLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_HLINE);
-      ObjectDelete(0, name);
+      // Only delete lines created by this indicator (starting with "FBO_")
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
-   
+
    ArrayResize(g_lineHistory, 0);
    g_lineHistoryCount = 0;
    ChartRedraw();
@@ -962,9 +1013,11 @@ void CleanAllBoxes()
    for(int i = ObjectsTotal(0, 0, OBJ_RECTANGLE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_RECTANGLE);
-      ObjectDelete(0, name); 
+      // Only delete boxes created by this indicator (starting with "FBO_")
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
-   
+
    ArrayResize(g_breakoutHistory, 0);
    g_lastHighlightBoxName = "";
    ChartRedraw();
@@ -978,9 +1031,11 @@ void CleanAllFibos()
    for(int i = ObjectsTotal(0, 0, OBJ_FIBO) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_FIBO);
-      ObjectDelete(0, name);
+      // Only delete fibos created by this indicator (starting with "FBO_")
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
-   
+
    ResetManualFiboTracking();
    ChartRedraw();
 }
@@ -1029,43 +1084,48 @@ void ResetAutoMode()
 }
 
 //+------------------------------------------------------------------+
-//| Delete ALL Chart Objects (Complete Reset)                        |
+//| Delete All FBO Chart Objects (Complete Reset)                    |
 //+------------------------------------------------------------------+
 void DeleteAllChartObjects()
 {
-   // Delete ALL Horizontal Lines
+   // Delete only FBO Horizontal Lines
    for(int i = ObjectsTotal(0, 0, OBJ_HLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_HLINE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Trend Lines
+   // Delete only FBO Trend Lines
    for(int i = ObjectsTotal(0, 0, OBJ_TREND) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_TREND);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Vertical Lines
+   // Delete only FBO Vertical Lines
    for(int i = ObjectsTotal(0, 0, OBJ_VLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_VLINE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Rectangles/Boxes
+   // Delete only FBO Rectangles/Boxes
    for(int i = ObjectsTotal(0, 0, OBJ_RECTANGLE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_RECTANGLE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Fibonacci Retracements
+   // Delete only FBO Fibonacci Retracements
    for(int i = ObjectsTotal(0, 0, OBJ_FIBO) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_FIBO);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
    // Reset line history
@@ -1081,42 +1141,44 @@ void DeleteAllChartObjects()
 //+------------------------------------------------------------------+
 void CleanAllExceptActiveTrade()
 {
-   // Delete all Horizontal Lines EXCEPT the primary fibo line
+   // Delete only FBO Horizontal Lines EXCEPT the primary fibo line
    for(int i = ObjectsTotal(0, 0, OBJ_HLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_HLINE);
-      if(name != g_primaryFibo.lineName)
+      if(StringFind(name, "FBO_") == 0 && name != g_primaryFibo.lineName)
          ObjectDelete(0, name);
    }
 
-   // Delete all Fibonacci Retracements EXCEPT the primary fibo
+   // Delete only FBO Fibonacci Retracements EXCEPT the primary fibo
    for(int i = ObjectsTotal(0, 0, OBJ_FIBO) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_FIBO);
-      if(name != g_primaryFibo.fiboName)
+      if(StringFind(name, "FBO_") == 0 && name != g_primaryFibo.fiboName)
          ObjectDelete(0, name);
    }
 
-   // Delete all Rectangles/Boxes EXCEPT the current highlight
+   // Delete only FBO Rectangles/Boxes EXCEPT the current highlight
    for(int i = ObjectsTotal(0, 0, OBJ_RECTANGLE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_RECTANGLE);
-      if(name != g_lastHighlightBoxName)
+      if(StringFind(name, "FBO_") == 0 && name != g_lastHighlightBoxName)
          ObjectDelete(0, name);
    }
 
-   // Delete ALL Trend Lines
+   // Delete only FBO Trend Lines
    for(int i = ObjectsTotal(0, 0, OBJ_TREND) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_TREND);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Vertical Lines
+   // Delete only FBO Vertical Lines
    for(int i = ObjectsTotal(0, 0, OBJ_VLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_VLINE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
    // Clear line history except for the primary fibo line
@@ -1136,7 +1198,7 @@ void CleanAllExceptActiveTrade()
 //+------------------------------------------------------------------+
 void ResetIndicator()
 {
-   // Delete ALL objects on chart (not just FBO_* ones)
+   // Delete only FBO objects (preserves objects from other EAs/indicators)
    DeleteAllChartObjects();
 
    // Reset auto mode (resets state, timer, fibo tracking, line memory)
@@ -1206,8 +1268,8 @@ void UpdateCalculatedValues()
       g_calculatedBreakout = (int)MathRound(g_calculatedSL / 3.0);
    }
 
-   ObjectSetString(0, g_lblStopLoss, OBJPROP_TEXT, "Stop loss: " + IntegerToString(g_calculatedSL));
-   ObjectSetString(0, g_lblBreakout, OBJPROP_TEXT, "Breakout: " + IntegerToString(g_calculatedBreakout));
+   ObjectSetString(0, g_lblStopLoss, OBJPROP_TEXT, "SL: " + IntegerToString(g_calculatedSL));
+   ObjectSetString(0, g_lblBreakout, OBJPROP_TEXT, "BR: " + IntegerToString(g_calculatedBreakout));
 }
 
 //+------------------------------------------------------------------+
@@ -1905,8 +1967,7 @@ void UpdateTimer()
 {
    if(!InpEnableTimer || !g_tradeActive) {
       if(ObjectFind(0, g_lblTimer) >= 0) {
-          ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "--");
-          ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorDefault);
+          ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: --");
       }
       return;
    }
@@ -1915,10 +1976,9 @@ void UpdateTimer()
    int remaining = InpTimerDuration - elapsed;
    if(remaining < 0) remaining = 0;
    if(ObjectFind(0, g_lblTimer) < 0) return;
-   
-   string timerText = StringFormat("%d", remaining);
+
+   string timerText = StringFormat("TiMER: %d", remaining);
    ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, timerText);
-   ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, remaining > 10 ? InpTimerColorActiveHigh : InpTimerColorActiveLow);
    ChartRedraw();
 }
 
@@ -1929,10 +1989,10 @@ void SetTimerState(ENUM_TRADE_STATE state)
 {
    if(!InpEnableTimer || ObjectFind(0, g_lblTimer) < 0) return;
    switch(state) {
-      case TRADE_STATE_NONE:     ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "--"); ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorDefault); break;
-      case TRADE_STATE_BREAKOUT: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "--"); ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorArmed); break;
+      case TRADE_STATE_NONE:     ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: --"); break;
+      case TRADE_STATE_BREAKOUT: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: --"); break;
       case TRADE_STATE_ACTIVE:
-      case TRADE_STATE_RECOVERY: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, IntegerToString(InpTimerDuration)); ObjectSetInteger(0, g_lblTimer, OBJPROP_COLOR, InpTimerColorActiveHigh); break;
+      case TRADE_STATE_RECOVERY: ObjectSetString(0, g_lblTimer, OBJPROP_TEXT, "TiMER: " + IntegerToString(InpTimerDuration)); break;
    }
    ChartRedraw();
 }
@@ -2049,17 +2109,8 @@ void DetectUnmitigatedLevels()
       }
       else
       {
-         double multiplier = MULTIPLIER_FULL;
-         switch(InpShadowMultiplier)
-         {
-            case SHADOW_1X:      multiplier = MULTIPLIER_FULL;    break;
-            case SHADOW_HALF:    multiplier = MULTIPLIER_HALF;    break;
-            case SHADOW_THIRD:   multiplier = MULTIPLIER_THIRD;   break;
-            case SHADOW_QUARTER: multiplier = MULTIPLIER_QUARTER; break;
-         }
-
-         min_shadow_price = (slPoints * multiplier) * point;
-         Print("Shadow Auto Mode: SL=", slPoints, " points, Multiplier=", multiplier, ", Min Shadow=", min_shadow_price / point, " points");
+         min_shadow_price = (slPoints * InpShadowMultiplier) * point;
+         Print("Shadow Auto Mode: SL=", slPoints, " points, Multiplier=", InpShadowMultiplier, ", Min Shadow=", min_shadow_price / point, " points");
       }
    }
    else
@@ -2322,17 +2373,8 @@ void MergeNearbyLevels()
          return;
       }
 
-      double multiplier = MULTIPLIER_FULL;
-      switch(InpMergeMultiplier)
-      {
-         case MERGE_1X:      multiplier = MULTIPLIER_FULL;    break;
-         case MERGE_HALF:    multiplier = MULTIPLIER_HALF;    break;
-         case MERGE_THIRD:   multiplier = MULTIPLIER_THIRD;   break;
-         case MERGE_QUARTER: multiplier = MULTIPLIER_QUARTER; break;
-      }
-
-      proximity = (slPoints * multiplier) * SymbolInfoDouble(_Symbol, SYMBOL_POINT);
-      Print("Merge Auto Mode: SL=", slPoints, " points, Multiplier=", multiplier, ", Proximity=", proximity / SymbolInfoDouble(_Symbol, SYMBOL_POINT), " points");
+      proximity = (slPoints * InpMergeMultiplier) * SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+      Print("Merge Auto Mode: SL=", slPoints, " points, Multiplier=", InpMergeMultiplier, ", Proximity=", proximity / SymbolInfoDouble(_Symbol, SYMBOL_POINT), " points");
    }
    else
    {
