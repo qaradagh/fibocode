@@ -977,9 +977,11 @@ void CleanAllLines()
    for(int i = ObjectsTotal(0, 0, OBJ_HLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_HLINE);
-      ObjectDelete(0, name);
+      // Only delete lines created by this indicator (starting with "FBO_")
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
-   
+
    ArrayResize(g_lineHistory, 0);
    g_lineHistoryCount = 0;
    ChartRedraw();
@@ -993,9 +995,11 @@ void CleanAllBoxes()
    for(int i = ObjectsTotal(0, 0, OBJ_RECTANGLE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_RECTANGLE);
-      ObjectDelete(0, name); 
+      // Only delete boxes created by this indicator (starting with "FBO_")
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
-   
+
    ArrayResize(g_breakoutHistory, 0);
    g_lastHighlightBoxName = "";
    ChartRedraw();
@@ -1009,9 +1013,11 @@ void CleanAllFibos()
    for(int i = ObjectsTotal(0, 0, OBJ_FIBO) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_FIBO);
-      ObjectDelete(0, name);
+      // Only delete fibos created by this indicator (starting with "FBO_")
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
-   
+
    ResetManualFiboTracking();
    ChartRedraw();
 }
@@ -1064,39 +1070,44 @@ void ResetAutoMode()
 //+------------------------------------------------------------------+
 void DeleteAllChartObjects()
 {
-   // Delete ALL Horizontal Lines
+   // Delete only FBO Horizontal Lines
    for(int i = ObjectsTotal(0, 0, OBJ_HLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_HLINE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Trend Lines
+   // Delete only FBO Trend Lines
    for(int i = ObjectsTotal(0, 0, OBJ_TREND) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_TREND);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Vertical Lines
+   // Delete only FBO Vertical Lines
    for(int i = ObjectsTotal(0, 0, OBJ_VLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_VLINE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Rectangles/Boxes
+   // Delete only FBO Rectangles/Boxes
    for(int i = ObjectsTotal(0, 0, OBJ_RECTANGLE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_RECTANGLE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Fibonacci Retracements
+   // Delete only FBO Fibonacci Retracements
    for(int i = ObjectsTotal(0, 0, OBJ_FIBO) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_FIBO);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
    // Reset line history
@@ -1112,42 +1123,44 @@ void DeleteAllChartObjects()
 //+------------------------------------------------------------------+
 void CleanAllExceptActiveTrade()
 {
-   // Delete all Horizontal Lines EXCEPT the primary fibo line
+   // Delete only FBO Horizontal Lines EXCEPT the primary fibo line
    for(int i = ObjectsTotal(0, 0, OBJ_HLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_HLINE);
-      if(name != g_primaryFibo.lineName)
+      if(StringFind(name, "FBO_") == 0 && name != g_primaryFibo.lineName)
          ObjectDelete(0, name);
    }
 
-   // Delete all Fibonacci Retracements EXCEPT the primary fibo
+   // Delete only FBO Fibonacci Retracements EXCEPT the primary fibo
    for(int i = ObjectsTotal(0, 0, OBJ_FIBO) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_FIBO);
-      if(name != g_primaryFibo.fiboName)
+      if(StringFind(name, "FBO_") == 0 && name != g_primaryFibo.fiboName)
          ObjectDelete(0, name);
    }
 
-   // Delete all Rectangles/Boxes EXCEPT the current highlight
+   // Delete only FBO Rectangles/Boxes EXCEPT the current highlight
    for(int i = ObjectsTotal(0, 0, OBJ_RECTANGLE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_RECTANGLE);
-      if(name != g_lastHighlightBoxName)
+      if(StringFind(name, "FBO_") == 0 && name != g_lastHighlightBoxName)
          ObjectDelete(0, name);
    }
 
-   // Delete ALL Trend Lines
+   // Delete only FBO Trend Lines
    for(int i = ObjectsTotal(0, 0, OBJ_TREND) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_TREND);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
-   // Delete ALL Vertical Lines
+   // Delete only FBO Vertical Lines
    for(int i = ObjectsTotal(0, 0, OBJ_VLINE) - 1; i >= 0; i--)
    {
       string name = ObjectName(0, i, 0, OBJ_VLINE);
-      ObjectDelete(0, name);
+      if(StringFind(name, "FBO_") == 0)
+         ObjectDelete(0, name);
    }
 
    // Clear line history except for the primary fibo line
