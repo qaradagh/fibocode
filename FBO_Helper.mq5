@@ -252,6 +252,7 @@ input color          InpFocusDimmedBoxColor = C'40,40,40';   // Dimmed Box Color
 //| Input Parameters - Indicator Name Label Settings                 |
 //+------------------------------------------------------------------+
 input group "=== Indicator Name Label Settings ==="
+input string         InpIndicatorName = "▪ NY_FBO v3.0";    // Indicator Name (customizable)
 input ENUM_BASE_CORNER InpNameLabelCorner = CORNER_RIGHT_UPPER; // Name Label Anchor Corner
 input int            InpNameLabelX = 125;                  // Name Label X Position
 input int            InpNameLabelY = 420;                  // Name Label Y Position
@@ -760,7 +761,7 @@ void CreateIndicatorNameLabel()
    ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_COLOR, InpNameLabelColor);
    ObjectSetString(0, g_lblIndicatorName, OBJPROP_FONT, InpGlobalFont);
    ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_FONTSIZE, InpNameLabelFontSize);
-   ObjectSetString(0, g_lblIndicatorName, OBJPROP_TEXT, "▪ NY_FBO v3.0");
+   ObjectSetString(0, g_lblIndicatorName, OBJPROP_TEXT, InpIndicatorName);
    ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_SELECTABLE, false);
    ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_BACK, false);
 }
