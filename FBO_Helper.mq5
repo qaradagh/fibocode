@@ -547,18 +547,6 @@ int OnCalculate(const int rates_total,
 
    if(g_tradeActive && InpEnableTimer) { UpdateTimer(); }
 
-   // Update Focus Mode dynamically if active
-   if(g_isFocusActive)
-   {
-      string currentNearestLine = FindNearestLineToPrice();
-      if(currentNearestLine != "" && currentNearestLine != g_focusedLine)
-      {
-         // Nearest line has changed, update focus
-         DeactivateFocusMode();
-         ActivateFocusMode(currentNearestLine);
-      }
-   }
-
    return(rates_total);
 }
 
