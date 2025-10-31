@@ -1,9 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                                   FBO_Helper.mq5 |
 //+------------------------------------------------------------------+
-#property copyright "FBO Helper Indicator"
+#property copyright "NY_FBO Indicator"
 #property link      ""
 #property version   "3.00"
+#property description "New York Fake BreakOut Trading System with Recovery"
 #property indicator_chart_window
 #property indicator_plots 0
 #property indicator_buffers 1
@@ -248,6 +249,16 @@ input int            InpFocusDimmedWidth = 1;                // Dimmed Line Widt
 input color          InpFocusDimmedBoxColor = C'40,40,40';   // Dimmed Box Color
 
 //+------------------------------------------------------------------+
+//| Input Parameters - Indicator Name Label Settings                 |
+//+------------------------------------------------------------------+
+input group "=== Indicator Name Label Settings ==="
+input ENUM_BASE_CORNER InpNameLabelCorner = CORNER_RIGHT_UPPER; // Name Label Anchor Corner
+input int            InpNameLabelX = 125;                  // Name Label X Position
+input int            InpNameLabelY = 420;                  // Name Label Y Position
+input color          InpNameLabelColor = clrWhite;         // Name Label Color
+input int            InpNameLabelFontSize = 10;            // Name Label Font Size
+
+//+------------------------------------------------------------------+
 //| Input Parameters - Global Font Settings                          |
 //+------------------------------------------------------------------+
 input group "=== Global Font Settings ==="
@@ -277,6 +288,7 @@ string g_lblStopLoss = "FBO_LBL_SL";
 string g_lblBreakout = "FBO_LBL_BO";
 string g_lblTimer = "FBO_LBL_TIMER";
 string g_infoPanelBg = "FBO_INFO_PANEL_BG";
+string g_lblIndicatorName = "FBO_LBL_NAME";
 string g_lblWarning = "FBO_LBL_WARNING";
 string g_lblSymbolWarning = "FBO_LBL_SYM_WARNING"; 
 
@@ -448,6 +460,9 @@ int OnInit()
 
    // Create UI Panel (Buttons only)
    CreateUIPanel();
+
+   // Create Indicator Name Label
+   CreateIndicatorNameLabel();
 
    // Create Info Panel (SL, BR, Timer)
    CreateInfoPanel(); 
@@ -647,6 +662,7 @@ void DeleteUIPanel()
    ObjectDelete(0, g_btnUndo);
    ObjectDelete(0, g_btnFocus);
    ObjectDelete(0, g_infoPanelBg);
+   ObjectDelete(0, g_lblIndicatorName);
    ObjectDelete(0, g_lblStopLoss);
    ObjectDelete(0, g_lblBreakout);
    ObjectDelete(0, g_lblTimer);
@@ -730,6 +746,23 @@ void CreateInfoPanel()
    CreateInfoLabel(g_lblStopLoss, "SL: 0", labelX, labelY, InpInfoTextCorner);
    CreateInfoLabel(g_lblBreakout, "BR: 0", labelX, labelY + spacing, InpInfoTextCorner);
    CreateInfoLabel(g_lblTimer, "TiMER: 00:00", labelX, labelY + (spacing * 2), InpInfoTextCorner);
+}
+
+//+------------------------------------------------------------------+
+//| Create Indicator Name Label                                      |
+//+------------------------------------------------------------------+
+void CreateIndicatorNameLabel()
+{
+   ObjectCreate(0, g_lblIndicatorName, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_XDISTANCE, InpNameLabelX);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_YDISTANCE, InpNameLabelY);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_CORNER, InpNameLabelCorner);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_COLOR, InpNameLabelColor);
+   ObjectSetString(0, g_lblIndicatorName, OBJPROP_FONT, InpGlobalFont);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_FONTSIZE, InpNameLabelFontSize);
+   ObjectSetString(0, g_lblIndicatorName, OBJPROP_TEXT, "▪ NY_FBO v3.0");
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, g_lblIndicatorName, OBJPROP_BACK, false);
 }
 
 //+------------------------------------------------------------------+
